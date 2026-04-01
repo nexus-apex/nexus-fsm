@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Servicevisits | NexusFSM{% endblock %}
+{% block page_title %}Servicevisits{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <form class="search-bar" method="get" style="flex:1;margin-bottom:0">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search servicevisits...">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="follow_up_needed" {% if status_filter == 'follow_up_needed' %}selected{% endif %}>Follow Up Needed</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <a href="/servicevisits/create/" class="btn btn-primary">+ New ServiceVisit</a>
+</div>
+
+<div class="card">
+  {% if records %}
+  <table>
+    <thead>
+      <tr><th>Work Order</th><th>Technician Name</th><th>Visit Date</th><th>Duration Hours</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td><a href="/servicevisits/{{ r.pk }}/edit/"><strong>{{ r.work_order }}</strong></a></td>
+        <td>{{ r.technician_name|default:"-" }}</td>
+        <td style="color:var(--muted)">{{ r.visit_date|date:"M d, Y"|default:"-" }}</td>
+        <td>{{ r.duration_hours|floatformat:2 }}</td>
+        <td><span class="badge badge-blue">{{ r.get_status_display }}</span></td>
+        <td class="actions">
+          <a href="/servicevisits/{{ r.pk }}/edit/" class="btn btn-primary btn-sm">Edit</a>
+          <form method="post" action="/servicevisits/{{ r.pk }}/delete/" style="display:inline" onsubmit="return confirm('Delete?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No servicevisits found.</p>
+    <a href="/servicevisits/create/" class="btn btn-primary" style="margin-top:1rem">Create ServiceVisit</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
