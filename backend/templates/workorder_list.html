@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Workorders | NexusFSM{% endblock %}
+{% block page_title %}Workorders{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <form class="search-bar" method="get" style="flex:1;margin-bottom:0">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search workorders...">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Priority</option>
+      <option value="low" {% if status_filter == 'low' %}selected{% endif %}>Low</option>
+      <option value="medium" {% if status_filter == 'medium' %}selected{% endif %}>Medium</option>
+      <option value="high" {% if status_filter == 'high' %}selected{% endif %}>High</option>
+      <option value="emergency" {% if status_filter == 'emergency' %}selected{% endif %}>Emergency</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <a href="/workorders/create/" class="btn btn-primary">+ New WorkOrder</a>
+</div>
+
+<div class="card">
+  {% if records %}
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Customer Name</th><th>Priority</th><th>Status</th><th>Technician</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td><a href="/workorders/{{ r.pk }}/edit/"><strong>{{ r.title }}</strong></a></td>
+        <td>{{ r.customer_name|default:"-" }}</td>
+        <td><span class="badge badge-blue">{{ r.get_priority_display }}</span></td>
+        <td><span class="badge badge-blue">{{ r.get_status_display }}</span></td>
+        <td>{{ r.technician|default:"-" }}</td>
+        <td class="actions">
+          <a href="/workorders/{{ r.pk }}/edit/" class="btn btn-primary btn-sm">Edit</a>
+          <form method="post" action="/workorders/{{ r.pk }}/delete/" style="display:inline" onsubmit="return confirm('Delete?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No workorders found.</p>
+    <a href="/workorders/create/" class="btn btn-primary" style="margin-top:1rem">Create WorkOrder</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
